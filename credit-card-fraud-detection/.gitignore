@@ -11,15 +11,6 @@ build/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# Data files (large CSV should not be committed)
-data/*.csv
-data/*.zip
-
-# Output images
-outputs/*.png
-outputs/*.jpg
-outputs/*.pdf
-
 # Virtual environment
 venv/
 env/
