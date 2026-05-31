@@ -89,9 +89,6 @@ jupyter notebook notebooks/fraud_detection.ipynb
 - 混淆矩阵
 - 特征重要性排序
 
-## 📝 简历描述参考
-
-> 独立完成信用卡欺诈检测项目，对 10,000 笔交易数据进行特征工程（OneHot编码、循环时间编码）和不平衡处理（SMOTE），对比逻辑回归、随机森林、XGBoost 三种模型，通过 GridSearchCV 调优，最终模型召回率达 XX%，精准识别欺诈交易并给出可解释的业务建议。
 
 ## 📄 License
 
