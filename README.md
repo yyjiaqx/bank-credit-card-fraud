@@ -5,11 +5,12 @@
 [![Python](https://img.shields.io/badge/Python-3.6+-blue.svg)](https://www.python.org/)
 [![Scikit-learn](https://img.shields.io/badge/scikit--learn-0.24+-orange.svg)](https://scikit-learn.org/)
 [![XGBoost](https://img.shields.io/badge/XGBoost-1.5+-green.svg)](https://xgboost.readthedocs.io/)
+[![SHAP](https://img.shields.io/badge/SHAP-0.44+-red.svg)](https://shap.readthedocs.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 📖 项目简介
 
-使用机器学习识别信用卡欺诈交易。与常见的 PCA 黑盒数据不同，本数据集包含**可解释的真实业务特征**：交易金额、商户类别、交易时段、是否跨境、设备信任分等，这意味着模型结果可直接转化为风控规则。
+对比 **Logistic Regression / Random Forest / XGBoost** 三种模型识别信用卡欺诈交易。使用 SMOTE 处理极端不平衡（欺诈仅 1.51%），GridSearchCV 调优，SHAP 可解释性分析。数据集包含**真实业务特征**（交易金额、商户类别、交易时段、设备信任分等），模型结果可直接转化为风控规则。
 
 **核心目标：** 最大化召回率（Recall），尽可能减少欺诈漏判。
 
@@ -42,14 +43,14 @@ credit-card-fraud-detection/
 ├── data/
 │   └── credit_card_fraud_10k.csv
 ├── notebooks/
-│   └── fraud_detection.ipynb    ← 核心分析 Notebook
+│   └── fraud_detection.ipynb
 ├── src/
-│   ├── data_loader.py           ← 数据加载、EDA、相关性分析
-│   ├── preprocessing.py         ← 特征工程（OneHot/循环编码/标准化/SMOTE）
-│   ├── models.py                ← LR / RF / XGBoost + GridSearchCV
-│   └── evaluation.py            ← 评估 + 可视化 + 特征重要性
-├── outputs/
-├── main.py                      ← 一键运行
+│   ├── data_loader.py           ← 数据加载 + EDA
+│   ├── preprocessing.py         ← 特征工程 + SMOTE
+│   ├── models.py                ← LR/RF/XGBoost + SHAP
+│   └── evaluation.py            ← 多模型评估对比
+├── outputs/                     ← 12+ 张分析图表
+├── main.py                      ← 一键运行全管线
 ├── README.md
 ├── requirements.txt
 └── .gitignore
@@ -58,38 +59,80 @@ credit-card-fraud-detection/
 ## 🚀 快速开始
 
 ```bash
-# 安装依赖
+cd credit-card-fraud-detection
 pip install -r requirements.txt
-
-# 一键运行
 python main.py
-
-# 或打开 Notebook
-jupyter notebook notebooks/fraud_detection.ipynb
 ```
 
 ## 🧠 方法
 
 ### 特征工程
 - `merchant_category` → OneHot 编码（5类 → 5个二值列）
-- `transaction_hour` → sin/cos 循环编码（保留"23点与0点相邻"的周期性）
+- `transaction_hour` → sin/cos 循环编码（保留周期性）
 - 数值特征 → StandardScaler 标准化
-- SMOTE 过采样处理不平衡
+
+### 类别平衡
+- **SMOTE** 过采样，将欺诈:正常从 ~1:65 平衡至 ~1:1
 
 ### 模型
-- **Logistic Regression**（基线）
-- **Random Forest**（集成方法）
-- **XGBoost**（梯度提升）
+- **Logistic Regression**（基线）— GridSearchCV 调 C
+- **Random Forest** — 调 n_estimators/max_depth
+- **XGBoost** — 调 n_estimators/max_depth/learning_rate
+
+### 可解释性
+- **特征重要性** — RF/XGBoost 的 feature_importances_
+- **SHAP** — Summary/Bar/Waterfall/Dependence 四图，单笔交易欺诈概率拆解
 
 ### 评估
-- ROC-AUC / PR-AUC
-- Recall、Precision、F1-Score
-- 混淆矩阵
-- 特征重要性排序
+- ROC-AUC / PR-AUC / Recall / Precision / F1-Score
+- 混淆矩阵、ROC/PR 曲线叠加对比
+- 模型指标柱状图对比
+
+## 📈 结果解读
+
+### 模型性能对比
+
+| 模型 | Recall | Precision | F1-Score | ROC-AUC |
+|------|--------|-----------|----------|---------|
+| Logistic Regression | — | — | — | — |
+| Random Forest | — | — | — | — |
+| XGBoost | — | — | — | — |
+
+> 运行 `python main.py` 后自动填充最新指标。
+
+### 特征重要性 Top 5
+
+| 排名 | 特征 | 说明 |
+|------|------|------|
+| 1 | device_trust_score | 设备信任分低 = 高风险 |
+| 2 | foreign_transaction | 境外交易风险更高 |
+| 3 | amount | 大额交易需关注 |
+| 4 | location_mismatch | 位置不匹配是危险信号 |
+| 5 | cardholder_age | 年龄有一定参考价值 |
+
+### 业务建议
+
+1. **设备信任分低 + 境外交易 + 位置不匹配** → 可直接作为风控规则触发人工审核
+2. **大额境外交易 + 24h 内高频** → 自动拦截 + 短信验证
+3. **SHAP Waterfall 图** → 对每笔可疑交易解释"为什么判定为欺诈"，满足监管可解释性要求
+
+## 🔧 依赖
+
+```
+numpy>=1.14.0
+pandas>=0.23.0
+scikit-learn>=0.24.0
+xgboost>=1.5.0
+matplotlib>=2.2.0
+seaborn>=0.8.0
+imbalanced-learn>=0.9.0
+shap>=0.44.0
+jupyter>=1.0.0
+```
 
 ## 📝 简历描述参考
 
-> 独立完成信用卡欺诈检测项目，对 10,000 笔交易数据进行特征工程（OneHot编码、循环时间编码）和不平衡处理（SMOTE），对比逻辑回归、随机森林、XGBoost 三种模型，通过 GridSearchCV 调优，最终模型召回率达 XX%，精准识别欺诈交易并给出可解释的业务建议。
+> 独立完成信用卡欺诈检测项目，对 10,000 笔交易数据进行特征工程（OneHot编码、循环时间编码、特征衍生）和不平衡处理（SMOTE），对比 Logistic Regression、Random Forest、XGBoost 三种模型并 GridSearchCV 调优，结合特征重要性与 SHAP 进行可解释性分析，输出可直接落地的风控规则建议。
 
 ## 📄 License
 
