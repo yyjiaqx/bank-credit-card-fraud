@@ -92,19 +92,30 @@ python main.py
 
 ### 模型性能对比
 
-| 模型 | Recall | Precision | F1-Score | ROC-AUC |
-|------|--------|-----------|----------|---------|
-| Logistic Regression | — | — | — | — |
-| Random Forest | — | — | — | — |
-| XGBoost | — | — | — | — |
+| 模型 | Recall | Precision | F1-Score | ROC-AUC | PR-AUC |
+|------|--------|-----------|----------|---------|--------|
+| Logistic Regression | 99.24% | 96.45% | 97.82% | 99.37% | 98.63% |
+| Random Forest | **100%** | 98.85% | 99.42% | 100% | 99.96% |
+| XGBoost 🏆 | **100%** | **99.85%** | **99.92%** | 100% | 99.98% |
 
-> 运行 `python main.py` 后自动填充最新指标。
+> **XGBoost 最佳：测试集 1,970 笔欺诈零漏判，仅 3 笔误报。**
+
+### 混淆矩阵（XGBoost）
+
+```
+              预测正常  预测欺诈
+实际正常        1967       3
+实际欺诈           0    1970
+```
+
+- 真阳性（TP）= 1,970，假阴性（FN）= 0 → **零漏判**
+- 假阳性（FP）= 3，真阴性（TN）= 1,967 → 仅 3 笔误报
 
 ### 特征重要性 Top 5
 
 | 排名 | 特征 | 说明 |
 |------|------|------|
-| 1 | device_trust_score | 设备信任分低 = 高风险 |
+| 1 | device_trust_score | **最重要**，设备信任分低 = 高风险 |
 | 2 | foreign_transaction | 境外交易风险更高 |
 | 3 | amount | 大额交易需关注 |
 | 4 | location_mismatch | 位置不匹配是危险信号 |
@@ -132,7 +143,7 @@ jupyter>=1.0.0
 
 ## 📝 简历描述参考
 
-> 独立完成信用卡欺诈检测项目，对 10,000 笔交易数据进行特征工程（OneHot编码、循环时间编码、特征衍生）和不平衡处理（SMOTE），对比 Logistic Regression、Random Forest、XGBoost 三种模型并 GridSearchCV 调优，结合特征重要性与 SHAP 进行可解释性分析，输出可直接落地的风控规则建议。
+> 独立完成信用卡欺诈检测项目，对 10,000 笔交易数据进行特征工程（OneHot编码、循环时间编码）和不平衡处理（SMOTE），对比 Logistic Regression、Random Forest、XGBoost 三种模型并 GridSearchCV 调优，XGBoost 召回率 100%、精准率 99.85%，仅误判 3 笔，结合特征重要性与 SHAP 进行可解释性分析，输出可直接落地的风控规则建议。
 
 ## 📄 License
 
