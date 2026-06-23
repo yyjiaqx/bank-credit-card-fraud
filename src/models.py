@@ -1,7 +1,7 @@
 ﻿"""
 Credit Card Fraud Detection - Models
 Defines and trains Logistic Regression, Random Forest, and XGBoost classifiers
-with GridSearchCV hyperparameter tuning.
+with GridSearchCV hyperparameter tuning and SHAP explainability analysis.
 """
 import numpy as np
 from sklearn.linear_model import LogisticRegression

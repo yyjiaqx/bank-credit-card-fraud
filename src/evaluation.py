@@ -1,6 +1,6 @@
 ﻿"""
 Credit Card Fraud Detection - Evaluation
-Model evaluation, metrics, visualization, and feature importance.
+Model evaluation, metrics, visualization, feature importance, and SHAP.
 """
 import numpy as np
 import pandas as pd
